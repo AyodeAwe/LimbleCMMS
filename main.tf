@@ -52,10 +52,10 @@ locals {
         {
           name = "wordpress"
           efsVolumeConfiguration = {
-          fileSystemId = aws.
+          fileSystemId = ${aws_efs_file_system.wpefs.id}
           transitEncryption = "ENABLED"
           authorizationConfig = {
-              accessPointId = "${WOF_EFS_AP}"
+              accessPointId = "${aws_efs_file_system.wpefs.id}"
               iam = "DISABLED"
           }
           }
@@ -195,14 +195,14 @@ resource "aws_ecs_service" "main" {
   desired_count = 1
 
   network_configuration {
-    subnets          = data.terraform_remote_state.networking.outputs.subnets_private
+    subnets          = module.vpc.private_subnets
     security_groups  = [aws_security_group.main.id]
     assign_public_ip = false
   }
 
-  platform_version       = var.ecs_platform_version
-  scheduling_strategy    = var.ecs_scheduling_strategy
-  enable_execute_command = lookup(var.enable_execute_command, local.workspace)
+  platform_version       = "1.4.0"
+  scheduling_strategy    = "REPLICA"
+  enable_execute_command = true
 
   task_definition = "${resource.aws_ecs_task_definition.main.family}:${resource.aws_ecs_task_definition.main.revision}"
 
@@ -234,15 +234,19 @@ resource "aws_appautoscaling_target" "main" {
   service_namespace  = "ecs"
   resource_id        = "service/${resource.aws_ecs_service.main.cluster}/${aws_ecs_service.main.name}"
   scalable_dimension = "ecs:service:DesiredCount"
-  role_arn           = lookup(var.service_role_autoscaling, local.workspace)
-  min_capacity       = lookup(var.min_capacity, local.workspace)
-  max_capacity       = lookup(var.max_capacity, local.workspace)
+  role_arn           = data.aws_iam_role.autoscale_role
+  min_capacity       = 1
+  max_capacity       = 3
 
   lifecycle {
     ignore_changes = [
       role_arn
     ]
   }
+}
+
+data "aws_iam_role" "autoscale_role" {
+  name = "AWSServiceRoleForAutoScaling"
 }
 
 resource "aws_appautoscaling_policy" "cpu" {

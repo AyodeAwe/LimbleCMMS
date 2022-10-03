@@ -17,3 +17,8 @@ variable "container_port" {
     default = 80
     type    = number
 }
+
+variable "hostname" {
+    default = "wordpress.abc.com"
+}
+
