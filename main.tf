@@ -2,7 +2,13 @@ locals {
   main_container_definition = [
     {
       essential = true
-      image     = "configured-by-github-actions"
+      mountPoints = [
+        {
+          containerPath: "/bitnami/wordpress"
+          sourceVolume: "wordpress"
+        }
+      ]
+      image     = "bitnami/wordpress"
       name      = "${var.service_name}"
       portMappings = [
         {
@@ -10,6 +16,7 @@ locals {
           hostPort      = var.container_port
         }
       ]
+
     }
   ]
 }

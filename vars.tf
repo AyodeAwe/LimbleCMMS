@@ -1,11 +1,6 @@
-variable "ecr_repo_name" {
-    type    = string
-    default = "limblecmms-repo"
-}
-
 variable "service_name" {
     type    = string
-    default = "limblecmms-svc"
+    default = "wordpress-svc"
 }
 
 variable "region" {
