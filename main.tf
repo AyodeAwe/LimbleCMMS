@@ -16,7 +16,51 @@ locals {
           hostPort      = var.container_port
         }
       ]
-
+      environment = [
+        {
+            name  = "MARIADB_HOST"
+            value = "${WOF_RDS_ENDPOINT}"
+        }
+        {   
+              name  = "WORDPRESS_DATABASE_USER"
+              value =  "admin"
+        }
+        {   
+              name  = "WORDPRESS_DATABASE_PASSWORD"
+              value = "supersecretpassword"
+        }
+        {   
+            name   = "WORDPRESS_DATABASE_NAME"
+            value  = "wordpress"
+        }
+        {   
+            name= "PHP_MEMORY_LIMIT"
+            value= "512M"
+        }
+        {   
+            name = "enabled"
+            value= "false"
+        }
+        {   
+            name  = "ALLOW_EMPTY_PASSWORD"
+            value = "yes"
+        }
+      ]
+      }
+      ]
+      volumes = [
+        {
+          name = "wordpress"
+          efsVolumeConfiguration = {
+          fileSystemId = aws.
+          transitEncryption = "ENABLED"
+          authorizationConfig = {
+              accessPointId = "${WOF_EFS_AP}"
+              iam = "DISABLED"
+          }
+          }
+        }
+      ]
     }
   ]
 }
