@@ -17,7 +17,7 @@ locals {
 resource "aws_security_group" "main" {
   name        = "${var.service_name}-sg"
   description = "Allow ${var.service_name} ports within the VPC, and browsing from the outside"
-  vpc_id      = data.terraform_remote_state.networking.outputs.vpc_id
+  vpc_id      = module.terraform_remote_state.networking.outputs.vpc_id
 
   ingress {
     from_port   = var.container_port
@@ -25,14 +25,6 @@ resource "aws_security_group" "main" {
     protocol    = "tcp"
     cidr_blocks = [data.terraform_remote_state.networking.outputs.vpc_cidr]
     description = "Allow connection to Service Port"
-  }
-
-  ingress {
-    from_port   = var.datadog_agent_port
-    to_port     = var.datadog_agent_port
-    protocol    = "tcp"
-    cidr_blocks = [data.terraform_remote_state.networking.outputs.vpc_cidr]
-    description = "Allow connection to Datadog Agent Port"
   }
 
   egress {
@@ -45,9 +37,6 @@ resource "aws_security_group" "main" {
 
   tags = {
     Name        = "${var.service_name}-sg"
-    Environment = local.workspace
-    Team        = var.product
-    Service     = var.service
     Terraform   = true
   }
 
@@ -91,9 +80,6 @@ resource "aws_security_group" "alb" {
 
   tags = {
     Name        = "${var.service_name}-alb-sg"
-    Environment = local.workspace
-    Team        = var.product
-    Service     = var.service
     Terraform   = true
   }
 }
@@ -104,9 +90,6 @@ resource "aws_iam_role" "ecs_execution_role" {
 
   tags = {
     Name        = "${var.service_name}-ecs-role"
-    Environment = local.workspace
-    Team        = var.product
-    Service     = var.service
     Terraform   = true
   }
 }
@@ -123,9 +106,6 @@ resource "aws_iam_role" "ecs_task_role" {
 
   tags = {
     Name        = "${var.service_name}-sg"
-    Environment = local.workspace
-    Team        = var.product
-    Service     = var.service
     Terraform   = true
   }
 }
